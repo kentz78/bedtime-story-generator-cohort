@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Bedtime Story Generator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <header><h1>Bedtime Story Generator</h1></header>
+
+    <main class="layout">
+        <section class="form-pane" aria-label="Story details">
+            <p class="hint">Tell us about the story you'd like to read tonight.</p>
+            <form id="story-form">
+                <label>
+                    Child's name
+                    <input name="child_name" required placeholder="Aisha">
+                </label>
+                <label>
+                    Characters
+                    <input name="characters" placeholder="an owl and a fox">
+                </label>
+                <label>
+                    Setting
+                    <input name="setting" placeholder="an enchanted forest">
+                </label>
+                <label>
+                    Plot
+                    <input name="plot" required placeholder="looking for the moon">
+                </label>
+                <button id="generate-btn" type="button">Generate story</button>
+            </form>
+            <p id="error" class="error" role="alert"></p>
+        </section>
+
+        <section class="story-pane" aria-label="Story" aria-live="polite">
+            <div id="story-output" class="story-empty">
+                <p class="placeholder">Your story will appear here.</p>
+            </div>
+        </section>
+    </main>
+
+    <script>
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    function renderStory(text) {
+      const out = document.getElementById("story-output");
+      out.classList.remove("story-empty", "story-loading");
+      out.classList.add("story-rendered");
+      document.body.classList.add("story-active");
+      const paragraphs = text.split(/\n\s*\n/).map(p => `<p>${escapeHtml(p)}</p>`).join("");
+      out.innerHTML = paragraphs;
+    }
+
+    function showLoading() {
+      const out = document.getElementById("story-output");
+      out.classList.remove("story-empty", "story-rendered");
+      out.classList.add("story-loading");
+      out.innerHTML = '<p class="placeholder"><em>Writing your story…</em></p>';
+    }
+
+    function showEmpty() {
+      const out = document.getElementById("story-output");
+      out.classList.remove("story-loading", "story-rendered");
+      out.classList.add("story-empty");
+      out.innerHTML = '<p class="placeholder">Your story will appear here.</p>';
+      document.body.classList.remove("story-active");
+    }
+
+    document.getElementById("generate-btn").addEventListener("click", async () => {
+      const form = document.getElementById("story-form");
+      const errEl = document.getElementById("error");
+      errEl.textContent = "";
+      showLoading();
+
+      const payload = {
+        child_name: form.child_name.value,
+        characters: form.characters.value,
+        setting: form.setting.value,
+        plot: form.plot.value,
+      };
+
+      try {
+        const r = await fetch("/story", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.detail || "Request failed");
+        renderStory(data.story);
+      } catch (e) {
+        showEmpty();
+        errEl.textContent = e.message;
+      }
+    });
+    </script>
+</body>
+</html>

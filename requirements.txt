@@ -1,0 +1,22 @@
+# Course-wide pinned dependencies for the Bedtime Story Generator.
+# This is a UNION of every module's requirements — `pip install -r requirements.txt`
+# once at the start (after creating the shared venv) gives you a venv that runs
+# all 8 modules without per-module reinstalls.
+#
+# Per-module `dist/module_NN_*/requirements.txt` files stay as honest snapshots
+# of what THAT module needs — Render reads from `dist/module_07_deploy_vercel/`
+# at deploy time, and Module 1's BEFORE/AFTER narration ("we removed httpx
+# because we no longer need it") still works because students read the file,
+# they don't re-run pip.
+#
+# Discipline: every `pip install <pkg>` must be preceded by adding the
+# pinned line here (and to the relevant per-module file), then
+# `pip install -r requirements.txt`.
+
+fastapi==0.115.*
+uvicorn[standard]==0.32.*
+jinja2==3.1.*                # Modules 0–6 (HTML templates); Module 7 ships static via Vercel
+httpx==0.27.*                # Module 0 only (Ollama HTTP client); Module 1 swaps to google-genai
+psycopg[binary]==3.2.*
+python-dotenv==1.0.*
+google-genai>=1.0.0           # Modules 1–7 (hosted LLM via SDK)

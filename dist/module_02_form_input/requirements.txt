@@ -1,0 +1,14 @@
+# Pinned dependencies for the Bedtime Story Generator.
+# Module 1 swaps the LLM provider: drops httpx (only used by the V1 Ollama
+# call + the V1 healthz Ollama probe) and adds google-genai (Google's
+# actively-maintained Gemini SDK; the older google-generativeai package
+# is deprecated as of late 2025).
+# Discipline: every `pip install <pkg>` must be preceded by adding the
+# pinned line here, then `pip install -r requirements.txt`.
+
+fastapi==0.115.*
+uvicorn[standard]==0.32.*
+jinja2==3.1.*
+psycopg[binary]==3.2.*
+python-dotenv==1.0.*
+google-genai>=1.0.0

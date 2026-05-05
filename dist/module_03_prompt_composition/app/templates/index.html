@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Bedtime Story Generator</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <h1>Bedtime Story Generator</h1>
+    <p class="subtitle">Tell us a little about the story, and we'll write one to read aloud.</p>
+
+    <form id="story-form">
+        <label>
+            Child's name
+            <input name="child_name" required placeholder="e.g. Aisha">
+        </label>
+        <label>
+            Characters
+            <input name="characters" placeholder="e.g. an owl and a fox">
+        </label>
+        <label>
+            Setting
+            <input name="setting" placeholder="e.g. an enchanted forest">
+        </label>
+        <label>
+            Plot
+            <input name="plot" required placeholder="e.g. looking for the moon">
+        </label>
+        <button id="generate-btn" type="button">Generate story</button>
+    </form>
+
+    <div id="story-output"></div>
+    <div id="error"></div>
+
+    <script>
+    function escapeHtml(s) {
+      return s.replace(/[&<>"']/g, c => ({
+        "&": "&amp;", "<": "&lt;", ">": "&gt;", "\"": "&quot;", "'": "&#39;"
+      }[c]));
+    }
+
+    function renderStory(text) {
+      const out = document.getElementById("story-output");
+      const paragraphs = text.split(/\n\s*\n/).map(p => `<p>${escapeHtml(p)}</p>`).join("");
+      out.innerHTML = paragraphs;
+    }
+
+    document.getElementById("generate-btn").addEventListener("click", async () => {
+      const form = document.getElementById("story-form");
+      const errEl = document.getElementById("error");
+      const outEl = document.getElementById("story-output");
+      errEl.textContent = "";
+      outEl.innerHTML = "<p><em>Writing…</em></p>";
+
+      const payload = {
+        child_name: form.child_name.value,
+        characters: form.characters.value,
+        setting: form.setting.value,
+        plot: form.plot.value,
+      };
+
+      try {
+        const r = await fetch("/story", {
+          method: "POST",
+          headers: {"Content-Type": "application/json"},
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        if (!r.ok) throw new Error(data.detail || "Request failed");
+        renderStory(data.story);
+      } catch (e) {
+        outEl.innerHTML = "";
+        errEl.textContent = e.message;
+      }
+    });
+    </script>
+</body>
+</html>
