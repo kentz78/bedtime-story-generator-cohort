@@ -5,7 +5,7 @@ from google.genai import errors as genai_errors
 from fastapi import HTTPException
 
 GEMINI_API_KEY = os.environ["GEMINI_API_KEY"]
-GEMINI_MODEL = "gemini-2.5-flash-lite"
+GEMINI_MODEL = "gemini-3.5-flash-lite"
 SYSTEM_PROMPT = (
     "You are a concise, helpful assistant. "
     "Answer in one short paragraph (under 80 words). "
